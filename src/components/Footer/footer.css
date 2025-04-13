@@ -1,0 +1,36 @@
+.footer {
+    width: 100%;
+    position: relative;
+}
+
+.footer-rectangle {
+    width: 100%;
+    height: 52px;
+    background-color: var(--secondary-color);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; 
+    padding-right: 20px; 
+}
+
+.footer-text {
+    margin: 0;
+    margin-right: 20px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: #131313;
+}
+
+.footer-link {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+    color: #ccc; /* Muda a cor ao passar o mouse */
+}

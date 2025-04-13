@@ -1,0 +1,28 @@
+@import '/src/variables.css';
+
+.info-text {
+    font-size: 1rem; 
+    font-family: var(--font-family);
+    color: #000;
+    font-weight: regular;
+    padding-left: 8%;
+    padding-right: 8%;
+    padding-bottom: 1%;
+    padding-top: 1%;
+}
+
+@media (max-width: 768px) {
+    .info-text {
+        font-size: 0.9rem;
+        padding-left: 8%;
+        padding-right: 8%;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-text {
+        font-size: 0.8rem;
+        padding-left: 10%;
+        padding-right: 10%;
+    }
+}

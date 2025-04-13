@@ -1,0 +1,106 @@
+.modality {
+    margin-left: 8%;
+}
+
+.modality-text {
+    font-size: var(--font-selection);
+    font-family: var(--font-family);
+    font-weight: bold;
+
+    margin-bottom: 10px;
+}
+
+.modality-buttons {
+    display: flex;
+    gap: 10px; 
+}
+
+.modality-button {
+    width: var(--button-width);
+    padding: 10px 20px;
+
+    font-size: var(--font-button);
+    font-family: var(--font-family);
+
+    border: none;
+    border-radius: 5px;
+    border-style: solid;
+    border-color: #000;
+    border-width: thin;
+
+    cursor: pointer;
+
+    background-color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.modality-button.active {
+    background-color: var(--primary-color);
+    color: #000;
+}
+
+.modality-button:hover {
+    background-color: var(--primary-color);
+}
+
+.component {
+    margin-top: 20px;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .modality {
+        margin: 10%;
+    }
+
+    .modality-text {
+        font-size: calc(var(--font-selection) - 2px);
+        margin-top: 20px;
+    }
+
+    .modality-buttons {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .modality-button {
+        padding: 8px 16px;
+        font-size: calc(var(--font-button) - 2px);
+        width: auto;
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .modality {
+        margin-top: 4%;
+    }
+
+    .modality-text {
+        font-size: calc(var(--font-selection) - 4px);
+        margin-top: 15px;
+    }
+
+    .modality-buttons {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .modality-button {
+        padding: 6px 12px;
+        font-size: calc(var(--font-button) - 4px);
+        width: auto;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .component {
+        font-size: 1rem;
+    }
+}

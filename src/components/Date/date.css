@@ -1,0 +1,142 @@
+.date {
+    margin-top: 20px;
+}
+
+.date-tittle {
+    font-size: var(--font-selection);
+    font-family: var(--font-family);
+}
+
+.date-day {
+    font-size: var(--font-button);
+    font-family: var(--font-family);
+    margin-bottom: 10px;
+    margin-top: -8px;
+}
+
+.date-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.date-button {
+    padding: 10px 20px;
+    width: 7rem;
+
+    font-size: var(--font-button);
+    font-family: var(--font-family);
+
+    border: none;
+    border-radius: 5px;
+    border-style: solid;
+    border-color: #000;
+    border-width: thin;
+
+    cursor: pointer;
+
+    background-color: #fff;
+    transition: background-color 0.3s ease;
+    position: relative;
+}
+
+.date-button.active {
+    background-color: var(--primary-color);
+    color: #000;
+}
+
+.date-button.ocupado {
+    background-color: #f5f5f5;
+    color: #a0a0a0;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
+}
+
+.date-button:hover{
+    background-color: var(--primary-color);
+}
+
+.ocupado-indicator {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ff4444;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-indicator {
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .date-tittle {
+        font-size: calc(var(--font-selection) - 2px);
+        margin-top: 20px;
+    }
+    
+    .date-day {
+        font-size: calc(var(--font-button) - 2px);
+    }
+    
+    .date-buttons {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .date-button {
+        padding: 8px 16px;
+        font-size: calc(var(--font-button) - 2px);
+        width: auto;
+        flex: 1;
+    }
+
+    .ocupado-indicator {
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .date-tittle {
+        margin-top: 15px;
+        font-size: calc(var(--font-selection) - 4px);
+    }
+    
+    .date-day {
+        font-size: calc(var(--font-button) - 4px);
+    }
+    
+    .date-buttons {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .date-button {
+        padding: 6px 12px;
+        font-size: calc(var(--font-button) - 4px);
+        width: auto;
+        flex: 1;
+        min-width: 50px;
+    }
+    
+    .loading-indicator {
+        color: #666;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+}

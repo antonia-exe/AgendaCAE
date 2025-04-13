@@ -1,0 +1,19 @@
+:root {
+    /* CORES */
+    --primary-color: #6CA5A9;
+    --secondary-color: #008584;
+    --success-color: #28a745;
+    --erro-color: #dc3545;
+
+    /* FONTES */
+    --font-family: 'Plus Jakarta Sans', sans-serif;
+    --font-button: 1.1rem;
+    --font-selection: 1.2rem;
+
+    /* BOTÕES */
+    --button-width: 12rem;
+    --button-bold: 700;
+    --button-hover-v2: #017B7A;
+    --button-block-v1: #C4443A;
+    --button-block-v2: #AD3D34;
+}

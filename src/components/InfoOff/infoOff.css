@@ -1,0 +1,155 @@
+.info-off-container {
+    display: flex;
+    margin-left: 5%;
+    margin-right: 5%;
+    padding-top: 10px;
+}
+
+.info-off-texts {
+    flex: 1; 
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
+    padding-top: 40px;
+}
+
+.info-off-rectangle {
+    background-color: var(--primary-color);
+    padding: 5px 0px;
+    border-radius: 10px;
+    text-align: center;
+    width: 220px;
+}
+
+.info-off-rectangle-text {
+    margin: 0;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: #000;
+}
+
+.info-off-title {
+    font-family: var(--font-family);
+    font-size: 2.5rem;
+    font-weight: bolder;
+    color: #131313;
+    margin: 0;
+    max-width: 80%;
+}
+
+.info-off-text {
+    font-family: var(--font-family);
+    font-size: 1.1rem;
+    font-weight: light;
+    color: #555;
+    margin: 0;
+    max-width: 80%;
+}
+
+.info-off-icon {
+    width: 433px;
+    height: 433px;
+}
+
+.info-off-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: var(--secondary-color);
+}
+
+.info-off-list {
+    margin-top: 20px;
+}
+
+.info-off-list button {
+    background-color: transparent;
+    color: #000;
+    font-family: var(--font-family);
+    font-size: var(--font-button);
+    border: none;
+    border-radius: 5px;
+    border-style: solid;
+    border-color: #000;
+    border-width: thin;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    padding: 10px 100px;
+}
+
+.info-off-list button:hover {
+    background-color: var(--secondary-color);
+}
+
+@media (max-width: 768px) {
+    .info-off-container {
+        flex-direction: column; 
+        align-items: center; 
+        margin-left: 18%;
+        margin-right: 18%;
+    }
+
+    .info-off-texts {
+        padding-top: 20px;
+        align-items: center; 
+        text-align: center; 
+        order: 2; 
+    }
+
+    .info-off-rectangle {
+        width: 220px; 
+    }
+
+    .info-off-title {
+        font-size: 2rem; 
+        max-width: 100%; 
+    }
+
+    .info-off-text {
+        font-size: 1rem; 
+        max-width: 100%; 
+    }
+
+    .info-off-icon {
+        width:200px; 
+        height: 200px;
+        order: 1; 
+    }
+
+    .info-off-list button {
+        padding: 10px 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-off-container {
+        margin-left: 4%;
+        margin-right: 4%;
+    }
+
+    .info-off-rectangle {
+        width: 220px;
+    }
+
+    .info-off-title {
+        font-size: 1.4rem; 
+    }
+
+    .info-off-text {
+        font-size: 0.9rem;
+    }
+
+    .info-off-icon {
+        width: 150px; 
+        height: 150px;
+        order: 1;
+    }
+
+    .info-off-texts {
+        order: 2;
+    }
+
+    .info-off-list button {
+        padding: 8px 60px;
+        font-size: 0.9rem;
+    }
+}

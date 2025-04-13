@@ -1,0 +1,124 @@
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index:1000;
+}
+
+.popup-content {
+    position: relative;
+    background-color: #fff;
+    padding: 40px 20px 20px;
+    border-radius: 12px;
+    text-align: center;
+    width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index:1001;
+}
+
+.popup-icon-circle {
+    width: 80px;
+    height: 80px;
+    background-color: var(--secondary-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: absolute;
+    top: -40px; /* Metade do círculo para fora */
+    left: 50%;
+    transform: translateX(-50%); /* Centraliza horizontalmente */
+}
+
+.popup-icon {
+    color: #fff; /* Cor do ícone */
+    font-size: 40px; /* Tamanho do ícone */
+}
+
+.popup-content p {
+    margin-bottom: 20px;
+    color: #666;
+
+    font-size: 1rem;
+    font-family: var(--font-family);
+}
+
+.popup-content button {
+    padding: 10px 20px;
+
+    font-size: var(--font-button);
+    font-family: var(--font-family);
+    font-weight: var(--button-bold);
+
+    background-color: var(--primary-color);
+
+    color: #000000;
+
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-content button:hover {
+    background-color: #5a8f8f;
+}
+
+@media (max-width: 768px) {
+    .popup-content {
+        width: 80%;
+        padding: 30px 15px 15px;
+    }
+
+    .popup-icon-circle {
+        width: 60px;
+        height: 60px;
+        top: -30px;
+    }
+
+    .popup-icon {
+        font-size: 30px;
+    }
+
+    .popup-content p {
+        font-size: 0.9rem;
+    }
+
+    .popup-content button {
+        padding: 8px 16px;
+        font-size: calc(var(--font-button) - 2px);
+    }
+}
+
+/* Responsividade para celulares */
+@media (max-width: 480px) {
+    .popup-content {
+        width: 90%;
+        padding: 20px 10px 10px;
+    }
+
+    .popup-icon-circle {
+        width: 50px;
+        height: 50px;
+        top: -25px;
+    }
+
+    .popup-icon {
+        font-size: 25px;
+    }
+
+    .popup-content p {
+        font-size: 0.8rem;
+    }
+
+    .popup-content button {
+        padding: 6px 12px;
+        font-size: calc(var(--font-button) - 4px);
+    }
+}

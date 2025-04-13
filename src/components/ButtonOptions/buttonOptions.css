@@ -1,0 +1,46 @@
+.options-container {
+    text-align: center;
+    padding: 10px 20px;
+}
+
+.options-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.option-button {
+    padding: 10px 20px;
+
+    font-size: var(--font-button);
+    font-family: var(--font-family);
+    font-weight: bold;
+
+    border: none;
+    border-radius: 5px;
+    border-style: solid;
+    border-color: #000;
+    border-width: thin;
+
+    background-color: transparent;
+
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    flex: 1;
+    max-width: 290px;
+}
+
+.option-button:hover {
+    background-color: var(--primary-color);
+}
+
+.option-button.active {
+    background-color: var(--primary-color);
+    color: rgb(0, 0, 0);
+}
+
+.component-container {
+    margin-top: 20px;
+}
