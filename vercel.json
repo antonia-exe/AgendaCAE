@@ -1,20 +1,15 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "backend/routes/server.js",
-        "use": "@vercel/node"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "backend/routes/server.js"
-      }
-    ],
-    "scripts": {
-      "start": "node backend/routes/server.js",
-      "vercel-build": "npm install && npm run build",
-      "build": "prisma generate && tsc"
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/routes/server.js",
+      "use": "@vercel/node"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "backend/routes/server.js"
+    }
+  ]
+}
