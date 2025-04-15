@@ -1,6 +1,27 @@
 import React, { useState } from "react";
-import "./daysCheckbox.css"; // Importe o CSS
+import "./daysCheckbox.css";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaExclamationTriangle } from "react-icons/fa";
+
+const PopUpAlteracoes = ({ onConfirm, onCancel }) => {
+    return (
+        <div className="popup-overlay">
+            <div className="popup-content">
+                <div className="popup-icon-circle">
+                    <FaExclamationTriangle className="popup-icon" />
+                </div>
+
+                <p>Tem certeza que deseja fazer essas alterações? 
+                Essa ação não poderá ser desfeita.</p>
+
+                <div className="popup-buttons-container">
+                    <button className="popup-button-cancel" onClick={onCancel}>Cancelar</button>
+                    <button className="popup-button-confirm" onClick={onConfirm}>Alterar</button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const DaysCheckbox = () => {
   // Estados para controlar se cada dropdown está aberto
@@ -18,30 +39,29 @@ const DaysCheckbox = () => {
   // Estado para rastrear se alguma alteração foi feita
   const [alteracaoFeita, setAlteracaoFeita] = useState(false);
 
+  // Estado para controlar o pop-up de confirmação
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+
   // Dias da semana
   const diasDaSemana = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira"];
 
   // Horários das 8:00 até às 17:00
   const horarios = Array.from({ length: 10 }, (_, i) => {
-    const hora = 8 + i; // Começa às 8:00 e vai até 17:00 (8 + 9 = 17)
-    return `${hora < 10 ? `0${hora}` : hora}:00`; // Formata para "HH:00"
+    const hora = 8 + i;
+    return `${hora < 10 ? `0${hora}` : hora}:00`;
   });
 
   // Função para lidar com a seleção/deseleção de horários
   const handleCheckboxChange = (local, dia, horario) => {
     setHorariosSelecionados((prev) => {
-      // Clona o estado anterior corretamente
       const novosHorarios = { ...prev, [local]: { ...prev[local] } };
 
-      // Se o dia ainda não existe, inicializa como um array vazio
       if (!novosHorarios[local][dia]) {
         novosHorarios[local][dia] = [];
       } else {
-        // Clona o array para evitar mutação direta
         novosHorarios[local][dia] = [...novosHorarios[local][dia]];
       }
 
-      // Adiciona ou remove o horário
       if (novosHorarios[local][dia].includes(horario)) {
         novosHorarios[local][dia] = novosHorarios[local][dia].filter((h) => h !== horario);
       } else {
@@ -57,7 +77,6 @@ const DaysCheckbox = () => {
   // Função para salvar a configuração no servidor
   const handleSalvarConfiguracao = async () => {
     try {
-        // Filtra as modalidades que foram alteradas
         const modalidadesAlteradas = Object.keys(horariosSelecionados).filter(
             (modalidade) => Object.keys(horariosSelecionados[modalidade]).length > 0
         );
@@ -67,13 +86,12 @@ const DaysCheckbox = () => {
             return;
         }
 
-        // Cria o corpo da requisição com apenas as modalidades alteradas
         const dadosParaSalvar = {};
         modalidadesAlteradas.forEach((modalidade) => {
             dadosParaSalvar[modalidade] = horariosSelecionados[modalidade];
         });
 
-        console.log("Dados enviados:", dadosParaSalvar); // Verifique os dados enviados
+        console.log("Dados enviados:", dadosParaSalvar);
 
         const response = await fetch("http://localhost:5000/salvar-configuracao", {
             method: "POST",
@@ -81,7 +99,6 @@ const DaysCheckbox = () => {
             body: JSON.stringify(dadosParaSalvar),
         });
 
-        // Verifique se a resposta do servidor é válida
         if (!response.ok) {
             const errorData = await response.text();
             console.error("Erro na resposta do servidor:", errorData);
@@ -102,11 +119,21 @@ const DaysCheckbox = () => {
         console.error("Erro ao salvar:", error);
         alert("Erro ao salvar configuração.");
     }
-};
-  
+  };
+
+  // Função para mostrar o pop-up de confirmação
+  const handleConfirmButtonClick = () => {
+    setShowConfirmPopup(true);
+  };
+
+  // Função para confirmar e salvar as alterações
+  const confirmSaveChanges = () => {
+    setShowConfirmPopup(false);
+    handleSalvarConfiguracao();
+  };
+
   return (
     <div className="days-checkbox-container">
-
       {/* MAMANGUAPE */}
       <div className="dropdown-container">
         <button className="dropdown-button" onClick={() => setIsOpenMME(!isOpenMME)}>
@@ -202,10 +229,22 @@ const DaysCheckbox = () => {
 
       {/* BOTÃO DE CONFIRMAR */}
       <div className="button-actions">
-        <button className="save-button" disabled={!alteracaoFeita} onClick={handleSalvarConfiguracao}>
+        <button 
+          className="save-button" 
+          disabled={!alteracaoFeita} 
+          onClick={handleConfirmButtonClick}
+        >
           Confirmar alterações
         </button>
       </div>
+
+      {/* POP-UP DE CONFIRMAÇÃO */}
+      {showConfirmPopup && (
+        <PopUpAlteracoes
+          onConfirm={confirmSaveChanges}
+          onCancel={() => setShowConfirmPopup(false)}
+        />
+      )}
     </div>
   );
 };

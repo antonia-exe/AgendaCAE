@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import './date.css';
 
-const Date = ({ day, times, isFirst, selectedDay, selectedTime, onTimeSelect, unidade }) => {
+const Date = ({ 
+    day, 
+    times, 
+    isFirst, 
+    selectedDay, 
+    selectedTime, 
+    onTimeSelect, 
+    unidade,
+    isWaitList = false 
+}) => {
     const [horariosIndisponiveis, setHorariosIndisponiveis] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -10,13 +19,19 @@ const Date = ({ day, times, isFirst, selectedDay, selectedTime, onTimeSelect, un
             setLoading(true);
             const fetchHorariosIndisponiveis = async () => {
                 try {
-                    const response = await fetch(
-                        `http://localhost:5000/horarios-indisponiveis?dia=${encodeURIComponent(day)}&unidade=${encodeURIComponent(unidade)}`
-                    );
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        setHorariosIndisponiveis(data.horariosIndisponiveis || []);
+                    // Só busca horários indisponíveis se NÃO for lista de espera
+                    if (!isWaitList) {
+                        const response = await fetch(
+                            `http://localhost:5000/horarios-indisponiveis?dia=${encodeURIComponent(day)}&unidade=${encodeURIComponent(unidade)}`
+                        );
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            setHorariosIndisponiveis(data.horariosIndisponiveis || []);
+                        }
+                    } else {
+                        // Se for lista de espera, considera todos horários disponíveis
+                        setHorariosIndisponiveis([]);
                     }
                 } catch (error) {
                     console.error('Erro ao buscar horários indisponíveis:', error);
@@ -26,7 +41,7 @@ const Date = ({ day, times, isFirst, selectedDay, selectedTime, onTimeSelect, un
             };
             fetchHorariosIndisponiveis();
         }
-    }, [day, unidade]);
+    }, [day, unidade, isWaitList]);
 
     if (loading) {
         return <div className="date">Carregando horários...</div>;
@@ -39,7 +54,8 @@ const Date = ({ day, times, isFirst, selectedDay, selectedTime, onTimeSelect, un
             <p className="date-day">{day}</p>
             <div className="date-buttons">
                 {times.map((time, index) => {
-                    const isIndisponivel = horariosIndisponiveis.includes(time);
+                    // Na lista de espera, todos horários estão disponíveis
+                    const isIndisponivel = isWaitList ? false : horariosIndisponiveis.includes(time);
                     return (
                         <button
                             key={index}
@@ -51,6 +67,7 @@ const Date = ({ day, times, isFirst, selectedDay, selectedTime, onTimeSelect, un
                             title={isIndisponivel ? "Horário indisponível" : ""}
                         >
                             {time}
+                            {isIndisponivel && !isWaitList && <span className="tooltip">Indisponível</span>}
                         </button>
                     );
                 })}

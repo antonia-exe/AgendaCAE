@@ -55,7 +55,8 @@ export default function CustomizedTables({ unidade }) {
         nome: aluno.name,
         curso: aluno.curso,
         horario: aluno.horario,
-        data: dataAgendamento
+        data: dataAgendamento,
+        unidade: unidade,
       });
 
       const response = await fetch('http://localhost:5000/enviar-email', {

@@ -1,49 +1,53 @@
 import React from "react";
 
-const getEmailTemplate = (alunoData) => {
-  // Normaliza a unidade para comparação (case insensitive e sem espaços)
-  const unidadeNormalizada = alunoData.unidade 
-    ? alunoData.unidade.toLowerCase().trim() 
+const getEmailTemplate = (aluno) => {
+  // DEBUG - Mostra TODOS os campos recebidos
+  console.log('DADOS COMPLETOS DO ALUNO RECEBIDOS:', aluno);
+
+  const nome = aluno.nome;
+  const unidade = aluno.unidade;
+  const dia = aluno.data;
+  const horario = aluno.horario; 
+
+  const unidadeNormalizada = unidade 
+    ? unidade.toString()
+              .toLowerCase()
+              .trim()
+              .replace(/\s+/g, '')
+              .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     : null;
-  
-  const isPresencial = ["Mamanguape", "RioTinto"].includes(unidadeNormalizada);
+
+
+  const unidadesPresenciais = ["mamanguape", "riotinto"];
+  const isPresencial = unidadeNormalizada 
+    ? unidadesPresenciais.some(u => unidadeNormalizada.includes(u))
+    : false;
+
 
   return {
     subject: "[AGENDA CAES] - Confirmação de Agendamento",
     html: `
-        <!-- Cabeçalho -->
-          <h2>Confirmação de Agendamento</h2>
+        <h2>Confirmação de Agendamento</h2>
+        <p>Prezado(a) ${nome},</p>
+        <p>Seu agendamento foi confirmado com sucesso:</p>
         
-        <!-- Conteúdo -->
-          <p>Prezado(a) ${alunoData.nome || 'aluno'},</p>
-          <p>Seu agendamento foi confirmado com sucesso, segue as informações: </p>
-          
-          <!-- Detalhes do Agendamento -->
-            <p><strong>📅 Data:</strong> ${alunoData.data}</p>
-            <p><strong>⏰ Horário:</strong> ${alunoData.horario}</p>
-            <p><strong>📌 Modalidade:</strong> ${isPresencial ? 'Presencial' : 'Online'}</p>
+        <p><strong>📅 Data:</strong> ${dia}</p>
+        <p><strong>⏰ Horário:</strong> ${horario}</p>
+        <p><strong>📌 Modalidade:</strong> ${isPresencial ? 'Presencial' : 'Online'}</p>
             
-            ${isPresencial
-              ? `<p><strong>🏢 Unidade:</strong> ${
-                  alunoData.unidade.charAt(0).toUpperCase() + 
-                  alunoData.unidade.slice(1).toLowerCase()
-                }</p>`
-              : `<p style="margin-top: 8px; font-size: 0.9em; color: #555;">
-                  🔗 Você receberá o link da videoconferência (Google Meet) 
-                  até 30 minutos antes do horário agendado.
-                 </p>`
-            }
-          </div>
-          
-          <p>Caso precise reagendar ou cancelar, por favor entre em contato com antecedência.</p>
-        </div>
+        ${isPresencial 
+            ? `<p><strong>🏢 Unidade:</strong> ${unidade}</p>`
+            : `<p style="margin-top: 8px; font-size: 0.9em; color: #555;">
+                🔗 Link do Google Meet será enviado 30 minutos antes
+               </p>`
+        }
         
-        <!-- Rodapé -->
+        <p>Caso precise alterar, entre em contato com antecedência.</p>
+        
         <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; font-size: 0.9em; color: #666;">
           <p>Atenciosamente,</p>
-          <p><strong>Serviço de Psicologia da Coordenação de Assistência Estudantil - Agenda CAES</strong></p>
+          <p><strong>Agenda CAES</strong></p>
         </div>
-      </div>
     `
   };
 };

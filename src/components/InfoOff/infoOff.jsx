@@ -1,8 +1,14 @@
 import React from 'react';
-import './infoOff.css';
+import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Icon } from '../../assets/icon-clock.svg';
+import './infoOff.css';
 
 const InfoOff = () => {
+    const navigate = useNavigate();
+
+    const handleWaitListClick = ()  => {
+        navigate('/lista-espera');
+    }
     return (
         <div className="info-off-container">
             {/* Parte dos textos */}
@@ -18,7 +24,7 @@ const InfoOff = () => {
 
                 {/* Botão da lista de espera */}
                 <div className="info-off-list">
-                    <button>Lista de espera</button>
+                    <button onClick={handleWaitListClick}>Lista de espera</button>
                 </div>
             </div>
 

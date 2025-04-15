@@ -1,33 +1,26 @@
+// src/database/database.js
 const { Sequelize } = require('sequelize');
-const dns = require('dns');
 
-// Força IPv4 para todas as conexões DNS
-dns.setDefaultResultOrder('ipv4first');
+// Configuração do banco de dados
+const sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: 'C:/Users/antonia/agenda-caes/src/database/database.sqlite' // Caminho do banco de dados
+});
 
-const sequelize = new Sequelize(
-  'postgresql://postgres.axkkykkyopkbwggjjzkq:Teste%40BancoDeDados@aws-0-sa-east-1.pooler.supabase.com:6543/postgres',
-  {
-    dialect: 'postgres',
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false
-      },
-      connectTimeout: 10000
-    },
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    },
-    logging: console.log // Apenas para desenvolvimento
-  }
-);
+// Função para testar a conexão com o banco de dados
+async function testConnection() {
+    try {
+        await sequelize.authenticate();
+        console.log('Conexão com o banco de dados estabelecida com sucesso.');
+    } catch (error) {
+        console.error('Erro ao conectar ao banco de dados:', error);
+    }
+}
 
-// Teste de conexão
-sequelize.authenticate()
-  .then(() => console.log('✅ Conexão com Supabase estabelecida via Pooler'))
-  .catch(err => console.error('❌ Erro de conexão:', err));
+// Testar a conexão se o arquivo for executado diretamente
+if (require.main === module) {
+    testConnection();
+}
 
+// Exportar a instância do Sequelize para ser usada em outros arquivos
 module.exports = sequelize;

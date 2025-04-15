@@ -118,6 +118,12 @@
     opacity: 0.9;
 }
 
+.matricula-exists, .phone-error {
+    color: #C4443A; 
+    font-size: 1rem;
+    font-family: var(--font-family);
+}
+
 @media (max-width: 768px) {
     .forms-container {
         width: 90%;

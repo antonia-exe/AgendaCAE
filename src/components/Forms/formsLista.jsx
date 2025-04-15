@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './forms.css';
 
-const Forms = ({ modality, day, time, location, dataTeste }) => {
+const FormsLista = ({ modality, day, time, location }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
@@ -64,7 +64,7 @@ const Forms = ({ modality, day, time, location, dataTeste }) => {
     const checkMatriculaExists = async (matricula) => {
         setIsCheckingMatricula(true);
         try {
-            const response = await fetch(`http://localhost:5000/verificar-matricula?matricula=${matricula}`);
+            const response = await fetch(`http://localhost:5000/verificar-matricula-lista?matricula=${matricula}`);
             const result = await response.json();
             
             if (response.ok) {
@@ -108,11 +108,11 @@ const Forms = ({ modality, day, time, location, dataTeste }) => {
             day,
             time,
             location,
-            dataTeste: dataTeste || null
+            status: 'pendente'
         };
     
         try {
-            const response = await fetch('http://localhost:5000/salvar-aluno', {
+            const response = await fetch('http://localhost:5000/salvar-lista-espera', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -123,8 +123,8 @@ const Forms = ({ modality, day, time, location, dataTeste }) => {
             const result = await response.json();
     
             if (response.ok) {
-                console.log('Aluno cadastrado com sucesso:', result.data);
-                alert('Cadastro realizado com sucesso!');
+                console.log('Cadastrado na lista de espera:', result.data);
+                alert('Você foi cadastrado na lista de espera com sucesso!');
                 setName('');
                 setEmail('');
                 setPhone('');
@@ -132,8 +132,8 @@ const Forms = ({ modality, day, time, location, dataTeste }) => {
                 setNumber('');
                 setMatriculaExists(false);
             } else {
-                console.error('Erro ao cadastrar aluno:', result.message);
-                alert('Erro ao cadastrar aluno. Por favor, tente novamente.');
+                console.error('Erro ao cadastrar na lista:', result.message);
+                alert('Erro ao cadastrar na lista de espera. Por favor, tente novamente.');
             }
         } catch (error) {
             console.error('Erro ao enviar formulário:', error);
@@ -143,7 +143,9 @@ const Forms = ({ modality, day, time, location, dataTeste }) => {
 
     return (
         <div className="forms-container">
+            
             <form onSubmit={handleSubmit}>
+                {/* Campos do formulário (iguais ao Forms.jsx) */}
                 <div className="form-group large">
                     <label>Nome completo</label>
                     <input
@@ -172,7 +174,7 @@ const Forms = ({ modality, day, time, location, dataTeste }) => {
                         type="tel"
                         value={phone}
                         onChange={handlePhoneChange}
-                        placeholder="Digite seu número de telefone"
+                        placeholder="(00) 00000-0000"
                         required
                         maxLength={15}
                     />
@@ -207,18 +209,18 @@ const Forms = ({ modality, day, time, location, dataTeste }) => {
                         placeholder="Digite seu número de matrícula"
                         required
                     />
-                    {isCheckingMatricula}
+                    {isCheckingMatricula && <p className="checking-matricula">Verificando matrícula...</p>}
                     {matriculaExists && (
-                        <p className="matricula-exists">Matrícula já cadastrada</p>
+                        <p className="matricula-exists">Matrícula já cadastrada na lista de espera</p>
                     )}
                 </div>
 
                 <button className="submit-button" type="submit" disabled={!isFormValid()}>
-                    CONFIRMAR
+                    ENTRAR NA LISTA DE ESPERA
                 </button>
             </form>
         </div>
     );
 };
 
-export default Forms;
+export default FormsLista;

@@ -6,6 +6,7 @@ import UserManagement from './pages/UserManagement';
 import Login from './pages/Login';
 import Offline from './pages/Offline';
 import ProtectedRoute from './components/ProtectedRoute/protectedRoute';
+import UserFormsList from './pages/UserFormsLista';
 
 const AppContent = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const AppContent = () => {
     const savedState = localStorage.getItem("toggleState");
     if (savedState === "false") {
       console.log("Botão desativado - não verificando disponibilidade");
-      return; // Sai da função sem fazer a requisição
+      return; 
     }
 
     try {
@@ -56,6 +57,7 @@ const AppContent = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/acesso" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
       <Route path="/off" element={<Offline />} />
+      <Route path="/lista-espera" element={<UserFormsList />} />
     </Routes>
   );
 };

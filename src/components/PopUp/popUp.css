@@ -70,6 +70,46 @@
     background-color: #5a8f8f;
 }
 
+.popup-buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-direction: row-reverse; /* Esta linha inverte a ordem visual mantendo a semântica */
+}
+
+.popup-button-confirm {
+    background-color: var(--primary-color);
+    color: #000;
+    padding: 10px 30px !important; 
+    font-size: var(--font-button);
+    font-family: var(--font-family);
+    font-weight: var(--button-bold);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-button-confirm:hover {
+    background-color: #5a8f8f;
+}
+
+.popup-button-cancel {
+    background-color: #f0f0f0 !important;
+    color: #666;
+    padding: 10px 20px !important;
+    font-size: var(--font-button);
+    font-family: var(--font-family);
+    font-weight: var(--button-bold);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-button-cancel:hover {
+    background-color: #e0e0e0 !important;
+}
+
+
 @media (max-width: 768px) {
     .popup-content {
         width: 80%;

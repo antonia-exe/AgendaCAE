@@ -1,4 +1,4 @@
-process.env.TZ_DB = 'America/Sao_Paulo'
+process.env.TZ = 'America/Sao_Paulo'
 
 const express = require('express');
 const cors = require('cors');
@@ -10,6 +10,7 @@ const configuracaoMME = require('../../src/database/tabelas/configuracaoMME');
 const configuracaoRT = require('../../src/database/tabelas/configuracaoRT');
 const configuracaoON = require('../../src/database/tabelas/configuracaoON');
 const Aluno = require('../../src/database/tabelas/aluno');
+const AlunoLista = require('../../src/database/tabelas/alunoLista')
 
 const { Op } = require('sequelize');
 const ExcelJS = require('exceljs');
@@ -18,57 +19,26 @@ const axios = require('axios');
 const nodemailer = require('nodemailer');
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Usa a porta do Vercel em produção
+const PORT = 5000; // Backend na porta 5000
 
 let dataTeste = "2025-04-07T09:00:00";
 
-process.env.TZ = 'America/Sao_Paulo';
-
-// Forçar IPv4 quando necessário
-const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first');
-
-const startServer = async () => {
-    try {
-      // Testa conexão antes de iniciar
-      await sequelize.authenticate();
-      console.log('Conexão com banco de dados verificada');
-      
-      app.listen(PORT, () => {
-        console.log(`Servidor rodando na porta ${PORT}`);
-      });
-    } catch (error) {
-      console.error('Falha ao iniciar servidor:', error);
-      process.exit(1); // Encerra o processo com erro
-    }
-  };
-  
-  startServer();
-
-// Configuração inicial do Sequelize
-sequelize.authenticate()
-  .then(() => console.log('Conexão com Supabase estabelecida com sucesso!'))
-  .catch(err => console.error('Erro ao conectar ao Supabase:', err));
-
-// Sincronização do banco de dados
 (async () => {
     try {
-        if (process.env.NODE_ENV === 'development') {
-            await sequelize.sync({ force: true });
-            console.log("Banco recriado (apenas em desenvolvimento)");
-            
-            // Cria usuário admin apenas em desenvolvimento
-            const existePsicologo = await Psicologo.findOne({ where: { usuario: 'admin' } });
-            if (!existePsicologo) {
-                await Psicologo.create({
-                    usuario: 'admin1',
-                    senha: 'admin1'
-                });
-            }
-        } else {
-            await sequelize.sync();
-            console.log("Tabelas verificadas");
+        // Certifique-se de que as tabelas existem e são sincronizadas com o banco de dados
+        await sequelize.sync(); // Isso irá garantir que as tabelas sejam criadas (caso contrário, cria-as)
+        //console.log("Banco de dados sincronizado com sucesso.");
+
+        // Verifica se já existe um usuário antes de criar
+        const existePsicologo = await Psicologo.findOne({ where: { usuario: 'admin' } });
+        if (!existePsicologo) {
+            await Psicologo.create({
+                usuario: 'admin1',
+                senha: 'admin1'
+            });
+            //console.log("Usuário padrão criado!");
         }
+
     } catch (error) {
         console.error("Erro ao configurar o banco de dados:", error);
     }
@@ -274,6 +244,21 @@ app.get("/obter-configuracao", async (req, res) => {
     }
 });
 
+// Rota para verificar se a matrícula já existe
+app.get('/verificar-matricula', async (req, res) => {
+    try {
+        const { matricula } = req.query;
+        
+        // Substitua isso pela sua lógica de consulta ao banco de dados
+        const aluno = await Aluno.findOne({ where: { matricula } });
+        
+        res.json({ exists: !!aluno });
+    } catch (error) {
+        console.error('Erro ao verificar matrícula:', error);
+        res.status(500).json({ message: 'Erro ao verificar matrícula' });
+    }
+});
+
 app.post('/salvar-aluno', async (req, res) => {
     console.log('Dados recebidos:', req.body);
 
@@ -323,6 +308,59 @@ app.post('/salvar-aluno', async (req, res) => {
     }
 });
 
+app.get('/verificar-matricula-lista', async (req, res) => {
+    try {
+        const { matricula } = req.query;
+        const aluno = await AlunoLista.findOne({ where: { matricula } });
+        res.json({ exists: !!aluno });
+    } catch (error) {
+        console.error('Erro ao verificar matrícula:', error);
+        res.status(500).json({ message: 'Erro ao verificar matrícula' });
+    }
+});
+// Rota para salvar na lista de espera
+app.post('/salvar-lista-espera', async (req, res) => {
+    const dataTeste = '2025-04-07T09:00:00';
+    const { name, email, telefone, curso, matricula, modality, day, time, location } = req.body;
+
+    if (!name || !email || !telefone || !curso || !matricula || !modality || !day || !time) {
+        console.error('Campos obrigatórios não fornecidos:', { name, email, telefone, curso, matricula, modality, day, time });
+        return res.status(400).json({ success: false, message: 'Campos obrigatórios não fornecidos.' });
+    }
+
+    try {
+        // Determina a data de criação
+        let dataCriacao;
+        
+        if (dataTeste) {
+            // Se dataTeste foi fornecida, tenta converter para Date
+            const testDate = new Date(dataTeste);
+            dataCriacao = isNaN(testDate.getTime()) ? new Date() : testDate;
+        } else {
+            // Se não foi fornecida, usa a data atual
+            dataCriacao = new Date();
+        }
+
+        const aluno = await AlunoLista.create({
+            name,
+            email,
+            telefone,
+            curso,
+            matricula,
+            modalidade: modality,
+            dia: day,
+            horario: time, 
+            unidade: location,
+            createdAt: dataCriacao // Usa a data determinada acima
+        });
+
+        console.log('Aluno cadastrado com sucesso:', aluno); 
+        res.status(201).json({ success: true, message: 'Aluno cadastrado com sucesso!', data: aluno });
+    } catch (error) {
+        console.error('Erro ao salvar aluno:', error);
+        res.status(500).json({ success: false, message: 'Erro ao salvar aluno no banco de dados.' });
+    }
+});
 // Rota para buscar todos os alunos
 app.get('/alunos', async (req, res) => {
     try {
@@ -341,6 +379,65 @@ app.get('/alunos', async (req, res) => {
     } catch (error) {
         console.error('Erro ao buscar alunos:', error);
         res.status(500).json({ success: false, message: 'Erro ao buscar alunos.' });
+    }
+});
+
+app.get('/alunos-lista-espera', async (req, res) => {
+    try {
+        const {dia, horario, modalidade, unidade } = req.query;
+        
+        const whereClause = {};
+        if (dia) whereClause.dia = dia;
+        if (horario) whereClause.horario = horario;
+        if (modalidade) whereClause.modalidade = modalidade;
+        if (unidade) whereClause.unidade = unidade;
+
+        console.log('Consultando AlunoLista com filtros:', whereClause);
+
+        const alunos = await AlunoLista.findAll({
+            attributes: [
+                'name', 
+                'email', 
+                'telefone', 
+                'matricula', 
+                'curso', 
+                'createdAt', 
+                'dia', 
+                'horario', 
+                'unidade',
+                'modalidade',
+            ]
+        });
+
+        console.log(`Encontrados ${alunos.length} registros`);
+
+        const alunosFormatados = alunos.map(aluno => ({
+            ...aluno.dataValues,
+            diaCadastro: new Date(aluno.createdAt).toLocaleDateString('pt-BR', { 
+                day: '2-digit', 
+                month: '2-digit',
+                year: 'numeric'
+            }),
+            
+        }));
+
+        res.status(200).json(alunosFormatados);
+
+    } catch (error) {
+        console.error('Erro detalhado:', {
+            message: error.message,
+            stack: error.stack,
+            timestamp: new Date().toISOString()
+        });
+        
+        res.status(500).json({ 
+            success: false,
+            message: 'Erro ao buscar alunos da lista de espera',
+            error: process.env.NODE_ENV === 'development' ? {
+                message: error.message,
+                stack: error.stack
+            } : undefined
+        });
     }
 });
 
@@ -1167,11 +1264,120 @@ async function enviarEmailUnidade(unidade, alunos, dias, todasVagasPreenchidas) 
     }
 }
 
+async function ListaDeEsperaEmail() {
+    try {
+        console.log('Iniciando envio do e-mail da lista de espera...');
+        
+        // 1. Obter todos os alunos da lista de espera
+        const alunos = await AlunoLista.findAll({
+            order: [
+                ['dia', 'ASC'],
+                ['horario', 'ASC']
+            ]
+        });
+
+        console.log(`Total de alunos encontrados: ${alunos.length}`);
+
+        // 2. Se não houver alunos, não envia e-mail
+        if (alunos.length === 0) {
+            console.log('Nenhum aluno na lista de espera. E-mail não enviado.');
+            return { success: false, message: 'Nenhum aluno na lista de espera' };
+        }
+
+        // 3. Criar o conteúdo HTML do e-mail
+        const emailContent = `
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; }
+                    h1 { color:rgb(0, 0, 0); }
+                    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                    th { background-color: #008584; color: white; padding: 10px; text-align: left; }
+                    td { padding: 8px; border-bottom: 1px solid #ddd; }
+                    tr:nth-child(even) { background-color: #f2f2f2; }
+                    .footer { margin-top: 20px; font-size: 0.9em; color: #7f8c8d; }
+                </style>
+            </head>
+            <body>
+                <h1>📋 Lista de Espera - Atendimento Psicológico</h1>
+                <p>Segue a lista atualizada de alunos aguardando atendimento:</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Dia</th>
+                            <th>Horário</th>
+                            <th>Unidade</th>
+                            <th>Contato</th>
+                            <th>Matrícula</th>
+                            <th>Curso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${alunos.map(aluno => `
+                            <tr>
+                                <td>${aluno.name}</td>
+                                <td>${aluno.dia}</td>
+                                <td>${aluno.horario}</td>
+                                <td>${aluno.unidade || 'Online'}</td>
+                                <td>
+                                    ${aluno.email}<br>
+                                    ${aluno.telefone}
+                                </td>
+                                <td>${aluno.matricula}</td>
+                                <td>${aluno.curso}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <div class="footer">
+                    <p>Total de alunos na lista de espera: <strong>${alunos.length}</strong></p>
+                    <p>Este e-mail é enviado automaticamente toda terça-feira às 00:00.</p>
+                </div>
+            </body>
+            </html>
+        `;
+
+        // 4. Configurar o e-mail
+        const mailOptions = {
+            from: 'Sistema de Agendamento <emailtccteste@gmail.com>',
+            to: 'emailtccteste@gmail.com',
+            subject: `Lista de Espera - ${new Date().toLocaleDateString('pt-BR')}`,
+            html: emailContent
+        };
+
+        // 5. Enviar o e-mail
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`E-mail enviado com sucesso: ${info.messageId}`);
+        
+        return { success: true, messageId: info.messageId };
+
+    } catch (error) {
+        console.error('Erro ao enviar e-mail da lista de espera:', {
+            message: error.message,
+            stack: error.stack
+        });
+        return { success: false, error: error.message };
+    }
+}
+
 const formsAberto = schedule.scheduleJob('*/2 * * * *', async () => {
     const agora = getSaoPauloDate(dataTeste);
     console.log(`[Job] Verificando em: ${agora.toLocaleString('pt-BR')}`);
     
     await verificarVagasEEnviarEmail();
+    await ListaDeEsperaEmail()
+});
+
+app.get('/enviar-lista-espera', async (req, res) => {
+    try {
+        await ListaDeEsperaEmail();
+        res.json({ success: true, message: 'E-mail da lista de espera enviado' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 const formsFechado = schedule.scheduleJob('0 0-2 * * 2', async () => {
@@ -1182,12 +1388,6 @@ const formsFechado = schedule.scheduleJob('0 0-2 * * 2', async () => {
     }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor pronto na porta ${PORT}`);
-}).on('error', err => {
-  if (err.code === 'EADDRINUSE') {
-    console.log('Servidor não iniciado localmente - Modo desenvolvimento Vercel');
-  } else {
-    console.error('Erro no servidor:', err);
-  }
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
