@@ -13,7 +13,7 @@ const PopUpAlteracoes = ({ onConfirm, onCancel }) => {
                 <p>Tem certeza que deseja fazer essas alterações? Essa ação não poderá ser desfeita!</p>
 
                 <div className="popup-buttons-container-alter">
-                    <button className="popup-button-confirm" onClick={onConfirm}>Confirmar</button>
+                    <button className="popup-button-confirm" onClick={onConfirm}>Alterar</button>
                     <button className="popup-button-cancel" onClick={onCancel}>Cancelar</button>
                 </div>
             </div>

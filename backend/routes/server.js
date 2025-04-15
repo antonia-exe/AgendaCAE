@@ -25,32 +25,6 @@ let dataTeste = "2025-04-07T09:00:00";
 
 process.env.TZ = 'America/Sao_Paulo';
 
-// Forçar IPv4 quando necessário
-const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first');
-
-const startServer = async () => {
-    try {
-      // Testa conexão antes de iniciar
-      await sequelize.authenticate();
-      console.log('Conexão com banco de dados verificada');
-      
-      app.listen(PORT, () => {
-        console.log(`Servidor rodando na porta ${PORT}`);
-      });
-    } catch (error) {
-      console.error('Falha ao iniciar servidor:', error);
-      process.exit(1); // Encerra o processo com erro
-    }
-  };
-  
-  startServer();
-
-// Configuração inicial do Sequelize
-sequelize.authenticate()
-  .then(() => console.log('Conexão com Supabase estabelecida com sucesso!'))
-  .catch(err => console.error('Erro ao conectar ao Supabase:', err));
-
 // Sincronização do banco de dados
 (async () => {
     try {
