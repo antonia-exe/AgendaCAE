@@ -1,4 +1,4 @@
-process.env.TZ = 'America/Sao_Paulo'
+process.env.TZ_DB = 'America/Sao_Paulo'
 
 const express = require('express');
 const cors = require('cors');
@@ -19,10 +19,39 @@ const axios = require('axios');
 const nodemailer = require('nodemailer');
 
 const app = express();
-const PORT = 5000; // Backend na porta 5000
+const PORT = process.env.PORT || 5000; // Usa a porta do Vercel em produção
 
 let dataTeste = "2025-04-07T09:00:00";
 
+process.env.TZ = 'America/Sao_Paulo';
+
+// Forçar IPv4 quando necessário
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+
+const startServer = async () => {
+    try {
+      // Testa conexão antes de iniciar
+      await sequelize.authenticate();
+      console.log('Conexão com banco de dados verificada');
+      
+      app.listen(PORT, () => {
+        console.log(`Servidor rodando na porta ${PORT}`);
+      });
+    } catch (error) {
+      console.error('Falha ao iniciar servidor:', error);
+      process.exit(1); // Encerra o processo com erro
+    }
+  };
+  
+  startServer();
+
+// Configuração inicial do Sequelize
+sequelize.authenticate()
+  .then(() => console.log('Conexão com Supabase estabelecida com sucesso!'))
+  .catch(err => console.error('Erro ao conectar ao Supabase:', err));
+
+// Sincronização do banco de dados
 (async () => {
     try {
         // Certifique-se de que as tabelas existem e são sincronizadas com o banco de dados
@@ -1388,6 +1417,12 @@ const formsFechado = schedule.scheduleJob('0 0-2 * * 2', async () => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor pronto na porta ${PORT}`);
+}).on('error', err => {
+  if (err.code === 'EADDRINUSE') {
+    console.log('Servidor não iniciado localmente - Modo desenvolvimento Vercel');
+  } else {
+    console.error('Erro no servidor:', err);
+  }
 });
