@@ -14,12 +14,13 @@ const Psicologo = sequelize.define('Psicologo', {
         defaultValue: 'admin' 
     },
     senha: {
-        type: DataTypes.CHAR(8), 
+        type: DataTypes.STRING(8), // Alterado de CHAR(8) para STRING(8)
         allowNull: false,
         defaultValue: 'psicologiaccaeIV' 
     }
 }, {
-    freezeTableName: true
+    freezeTableName: true, // Mantém o nome da tabela igual ao definido
+    timestamps: false // Desabilita createdAt e updatedAt
 });
 
 module.exports = Psicologo;
