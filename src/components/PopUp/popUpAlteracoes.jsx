@@ -10,7 +10,7 @@ const PopUpAlteracoes = ({ onConfirm, onCancel }) => {
                     <FaExclamationTriangle className="popup-icon" />
                 </div>
 
-                <p>Tem certeza que deseja fazer essas alterações? Essa ação não poderá ser desfeita! </p>
+                <p>Tem certeza que deseja fazer essas alterações? Essa ação não poderá ser desfeita!</p>
 
                 <div className="popup-buttons-container-alter">
                     <button className="popup-button-confirm" onClick={onConfirm}>Confirmar</button>
