@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../database'); // Ajuste o caminho conforme necessário
+const sequelize = require('../database');
 
 const Aluno = sequelize.define('Aluno', {
     name: {

@@ -18,7 +18,7 @@ const Atendimento = sequelize.define('Atendimento', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'Alunos', // Nome da tabela Aluno (pluralizado)
+            model: 'Alunos',
             key: 'matricula'
         }
     }

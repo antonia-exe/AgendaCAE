@@ -24,7 +24,7 @@ const Header = () => {
                 )}
             
             </div>
-            <h1 className="header-title">AGENDA CAES</h1>
+            <h1 className="header-title">AGENDA CAE</h1>
             <div className="header-line"></div>
         </header>
     );

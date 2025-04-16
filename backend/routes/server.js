@@ -21,7 +21,7 @@ const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 5000; // Usa a porta do Vercel em produção
 
-let dataTeste = "2025-04-07T09:00:00";
+let dataTeste = "2025-04-21T09:00:00";
 
 process.env.TZ = 'America/Sao_Paulo';
 
