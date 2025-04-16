@@ -121,12 +121,10 @@ const DaysCheckbox = () => {
     }
   };
 
-  // Função para mostrar o pop-up de confirmação
   const handleConfirmButtonClick = () => {
     setShowConfirmPopup(true);
   };
 
-  // Função para confirmar e salvar as alterações
   const confirmSaveChanges = () => {
     setShowConfirmPopup(false);
     handleSalvarConfiguracao();

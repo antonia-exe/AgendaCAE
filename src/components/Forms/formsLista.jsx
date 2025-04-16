@@ -145,7 +145,6 @@ const FormsLista = ({ modality, day, time, location }) => {
         <div className="forms-container">
             
             <form onSubmit={handleSubmit}>
-                {/* Campos do formulário (iguais ao Forms.jsx) */}
                 <div className="form-group large">
                     <label>Nome completo</label>
                     <input

@@ -25,14 +25,11 @@ let dataTeste = "2025-04-07T09:00:00";
 
 process.env.TZ = 'America/Sao_Paulo';
 
-// Sincronização do banco de dados
 (async () => {
     try {
-        // Certifique-se de que as tabelas existem e são sincronizadas com o banco de dados
-        await sequelize.sync(); // Isso irá garantir que as tabelas sejam criadas (caso contrário, cria-as)
-        //console.log("Banco de dados sincronizado com sucesso.");
+        
+        await sequelize.sync({force : true}); 
 
-        // Verifica se já existe um usuário antes de criar
         const existePsicologo = await Psicologo.findOne({ where: { usuario: 'admin' } });
         if (!existePsicologo) {
             await Psicologo.create({
@@ -51,17 +48,15 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 app.use((req, res, next) => {
-    req.dataTeste = dataTeste; // Disponibiliza dataTeste em todas as rotas
+    req.dataTeste = dataTeste;
     next();
   });
 
   function getCurrentDate(req) {
-    // 1. Pega a data de teste (global ou query) ou data atual
     const dateInput = req?.dataTeste || req?.query?.dataTeste;
     const date = dateInput ? new Date(dateInput) : new Date();
     
-    // 2. Ajusta para o fuso de SP (UTC-3) sem alterar o horário
-    const offsetSP = -180; // -3 horas em minutos
+    const offsetSP = -180; 
     const adjustedDate = new Date(date.getTime() + (offsetSP - date.getTimezoneOffset()) * 60000);
     
     return adjustedDate;
@@ -76,10 +71,7 @@ const transporter = nodemailer.createTransport({
   });
 
 function getSaoPauloDate(dateString = null) {
-    // 1. Cria a data base
     const date = dateString ? new Date(dateString) : new Date();
-    
-    // 2. Formata para o fuso de SP
     return new Date(date.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
 }
 
@@ -92,22 +84,18 @@ const getDateFromDayOfWeek = (dayOfWeek) => {
         'sexta-feira': 5
     };
     
-    // Encontra a segunda-feira mais recente
     const today = new Date();
-    const currentDay = today.getDay(); // 0=Domingo, 1=Segunda, etc.
+    const currentDay = today.getDay(); 
     const lastMonday = new Date(today);
     
-    // Se hoje não é segunda, volta para a última segunda
     if (currentDay !== 1) {
         lastMonday.setDate(today.getDate() - ((currentDay + 6) % 7));
     }
     
-    // Zera as horas para evitar problemas com horário
     lastMonday.setHours(0, 0, 0, 0);
     
     const targetDay = daysMap[dayOfWeek.toLowerCase()];
     
-    // Calcula a data do dia da semana desejado
     const resultDate = new Date(lastMonday);
     resultDate.setDate(lastMonday.getDate() + (targetDay - 1));
     
@@ -141,7 +129,6 @@ app.post('/login', async (req, res) => {
     const { usuario, senha } = req.body;
 
     try {
-        // Busca o psicólogo no banco de dados
         const psicologo = await Psicologo.findOne({ where: { usuario, senha } });
 
         if (psicologo) {
@@ -172,33 +159,28 @@ app.post("/salvar-configuracao", async (req, res) => {
     try {
         const { mme, rt, online } = req.body;
 
-        // Função para salvar os horários em uma tabela específica
         const salvarHorarios = async (tabela, dados) => {
-            if (!dados) return; // Se não houver dados para essa modalidade, não faz nada
+            if (!dados) return;
 
-            await tabela.destroy({ where: {} }); // Limpa apenas a tabela da modalidade atual
+            await tabela.destroy({ where: {} });
 
-            // Itera sobre os dias e horários e insere no banco de dados
             for (const dia in dados) {
                 for (const horario of dados[dia]) {
                     await tabela.create({
-                        diaSemana: formatarDia(dia), // Formata o nome do dia
+                        diaSemana: formatarDia(dia),
                         horario,
                     });
                 }
             }
         };
 
-        // Salva os horários apenas para as modalidades que foram enviadas no corpo da requisição
         if (mme) await salvarHorarios(configuracaoMME, mme);
         if (rt) await salvarHorarios(configuracaoRT, rt);
         if (online) await salvarHorarios(configuracaoON, online);
 
-        // Responde com sucesso
         return res.json({ success: true, message: "Configuração salva com sucesso!" });
     } catch (error) {
         console.error("Erro ao salvar configuração:", error);
-        // Responde com erro
         return res.status(500).json({ success: false, message: "Erro ao salvar configuração" });
     }
 });
@@ -206,14 +188,12 @@ app.post("/salvar-configuracao", async (req, res) => {
 // Rota para obter configuração
 app.get("/obter-configuracao", async (req, res) => {
     try {
-        // Função para buscar os horários de uma tabela específica e associá-los a uma unidade
         const obterHorarios = async (tabela, unidade) => {
             try {
                 const horarios = await tabela.findAll();
-                //console.log('Horários obtidos:', horarios);  // Verifique os dados aqui
 
                 const horariosFormatados = horarios.reduce((acc, horario) => {
-                    const diaSemana = formatarDia(horario.diaSemana); // Formata o nome do dia
+                    const diaSemana = formatarDia(horario.diaSemana);
                     if (!acc[diaSemana]) acc[diaSemana] = [];
                     acc[diaSemana].push({
                         horario: horario.horario,
@@ -225,21 +205,18 @@ app.get("/obter-configuracao", async (req, res) => {
                 //console.log('Horários formatados:', horariosFormatados);  // Verifique os dados formatados
                 return { [unidade]: horariosFormatados }; // Retorna os dados com o nome da unidade
             } catch (error) {
-                console.error("Erro ao obter horários:", error);  // Adicionando log de erro
-                throw error; // Repassando erro para o catch do endpoint
+                console.error("Erro ao obter horários:", error);
+                throw error;
             }
         };
 
-        // Buscar os dados das 3 tabelas
         const mamanguape = await obterHorarios(configuracaoMME, "Mamanguape");
         const rioTinto = await obterHorarios(configuracaoRT, "RioTinto");
         const online = await obterHorarios(configuracaoON, "online");
 
-        // Combina os dados
         const data = { ...mamanguape, ...rioTinto, ...online };
         //console.log('Dados combinados:', data);  // Verifique os dados combinados
 
-        // Responder com os dados formatados
         res.json(data);
     } catch (error) {
         console.error("Erro ao buscar dados:", error);
@@ -252,7 +229,6 @@ app.get('/verificar-matricula', async (req, res) => {
     try {
         const { matricula } = req.query;
         
-        // Substitua isso pela sua lógica de consulta ao banco de dados
         const aluno = await Aluno.findOne({ where: { matricula } });
         
         res.json({ exists: !!aluno });
@@ -269,7 +245,7 @@ app.post('/salvar-aluno', async (req, res) => {
     //const { name, email, telefone, curso, matricula, modality, day, time, location, dataTeste } = req.body;
 
     //TESTES:
-    const dataTeste = '2025-04-07T09:00:00';
+    const dataTeste = '2025-04-21T09:00:00';
     const { name, email, telefone, curso, matricula, modality, day, time, location } = req.body;
 
     if (!name || !email || !telefone || !curso || !matricula || !modality || !day || !time) {
@@ -278,15 +254,12 @@ app.post('/salvar-aluno', async (req, res) => {
     }
 
     try {
-        // Determina a data de criação
         let dataCriacao;
         
         if (dataTeste) {
-            // Se dataTeste foi fornecida, tenta converter para Date
             const testDate = new Date(dataTeste);
             dataCriacao = isNaN(testDate.getTime()) ? new Date() : testDate;
         } else {
-            // Se não foi fornecida, usa a data atual
             dataCriacao = new Date();
         }
 
@@ -300,7 +273,7 @@ app.post('/salvar-aluno', async (req, res) => {
             dia: day,
             horario: time, 
             unidade: location,
-            createdAt: dataCriacao // Usa a data determinada acima
+            createdAt: dataCriacao
         });
 
         console.log('Aluno cadastrado com sucesso:', aluno); 
@@ -323,7 +296,7 @@ app.get('/verificar-matricula-lista', async (req, res) => {
 });
 // Rota para salvar na lista de espera
 app.post('/salvar-lista-espera', async (req, res) => {
-    const dataTeste = '2025-04-07T09:00:00';
+    const dataTeste = '2025-04-21T09:00:00';
     const { name, email, telefone, curso, matricula, modality, day, time, location } = req.body;
 
     if (!name || !email || !telefone || !curso || !matricula || !modality || !day || !time) {
@@ -332,15 +305,12 @@ app.post('/salvar-lista-espera', async (req, res) => {
     }
 
     try {
-        // Determina a data de criação
         let dataCriacao;
         
         if (dataTeste) {
-            // Se dataTeste foi fornecida, tenta converter para Date
             const testDate = new Date(dataTeste);
             dataCriacao = isNaN(testDate.getTime()) ? new Date() : testDate;
         } else {
-            // Se não foi fornecida, usa a data atual
             dataCriacao = new Date();
         }
 
@@ -354,7 +324,7 @@ app.post('/salvar-lista-espera', async (req, res) => {
             dia: day,
             horario: time, 
             unidade: location,
-            createdAt: dataCriacao // Usa a data determinada acima
+            createdAt: dataCriacao
         });
 
         console.log('Aluno cadastrado com sucesso:', aluno); 
@@ -369,10 +339,9 @@ app.get('/alunos', async (req, res) => {
     try {
         const alunos = await Aluno.findAll({
             attributes: ['name', 'email', 'telefone', 'matricula', 'curso', 'createdAt', 'dia', 'horario', 'unidade'], // Seleciona os campos desejados
-            order: [['createdAt', 'ASC']] // Ordena por data de cadastro
+            order: [['createdAt', 'ASC']]
         });
 
-        // Formata a data de cadastro para "dia/mês"
         const alunosFormatados = alunos.map(aluno => ({
             ...aluno.dataValues,
             diaCadastro: new Date(aluno.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
@@ -483,17 +452,14 @@ app.get('/alunos-unidade', async (req, res) => {
         };
 
         for (const aluno of alunos) {
-            // Usa a data de criação (createdAt) como referência
             const dataReferencia = aluno.createdAt ? new Date(aluno.createdAt) : new Date();
-            dataReferencia.setHours(0, 0, 0, 0); // Normaliza a hora
+            dataReferencia.setHours(0, 0, 0, 0);
             
             const deslocamento = diasParaDeslocamento[aluno.dia] ?? 0;
             
-            // Calcula a data real do agendamento
             const dataAgendamento = new Date(dataReferencia);
             dataAgendamento.setDate(dataReferencia.getDate() + deslocamento);
             
-            // Formatação da data
             const dataFormatada = dataAgendamento.toLocaleDateString('pt-BR', {
                 day: '2-digit',
                 month: 'long',
@@ -512,7 +478,6 @@ app.get('/alunos-unidade', async (req, res) => {
                     timeZone: 'America/Sao_Paulo'
                 }),
                 diaSemana: aluno.dia,
-                // Adiciona a data completa para referência (opcional)
                 dataAgendamentoCompleta: dataAgendamento.toISOString()
             });
         }
@@ -541,7 +506,6 @@ app.get('/horarios-ocupados', async (req, res) => {
             });
         }
 
-        // Define as condições de filtro
         const whereClause = {
             dia: dia
         };
@@ -559,7 +523,6 @@ app.get('/horarios-ocupados', async (req, res) => {
             where: whereClause
         });
 
-        // Extrai apenas os horários ocupados
         const horariosOcupados = alunos.map(aluno => aluno.horario);
 
         res.status(200).json({ 
@@ -586,13 +549,10 @@ app.get('/horarios-indisponiveis', async (req, res) => {
                 message: 'Parâmetros "dia" e "unidade" são obrigatórios' 
             });
         }
-
-        // Determina qual tabela usar
         const tabelaConfig = unidade === 'RioTinto' ? configuracaoRT : 
                            unidade === 'Mamanguape' ? configuracaoMME : 
                            configuracaoON;
 
-        // 1. Busca horários ocupados por alunos
         const alunos = await Aluno.findAll({
             attributes: ['horario'],
             where: {
@@ -607,7 +567,6 @@ app.get('/horarios-indisponiveis', async (req, res) => {
             }
         });
 
-        // 2. Busca horários bloqueados na tabela de configuração
         const bloqueados = await tabelaConfig.findAll({
             attributes: ['horario'],
             where: { 
@@ -616,7 +575,6 @@ app.get('/horarios-indisponiveis', async (req, res) => {
             }
         });
 
-        // Combina ambos os resultados
         const horariosIndisponiveis = [
             ...alunos.map(a => a.horario),
             ...bloqueados.map(b => b.horario)
@@ -624,7 +582,7 @@ app.get('/horarios-indisponiveis', async (req, res) => {
 
         res.status(200).json({ 
             success: true, 
-            horariosIndisponiveis: [...new Set(horariosIndisponiveis)] // Remove duplicatas
+            horariosIndisponiveis: [...new Set(horariosIndisponiveis)]
         });
 
     } catch (error) {
@@ -641,12 +599,10 @@ app.post('/toggle-bloqueio-horario', async (req, res) => {
     try {
         const { horario, dia, unidade, data } = req.body;
         
-        // Determina qual tabela usar baseado na unidade
         const tabelaConfig = unidade === 'RioTinto' ? configuracaoRT : 
                            unidade === 'Mamanguape' ? configuracaoMME : 
                            configuracaoON;
 
-        // Verifica se o horário já existe
         const horarioExistente = await tabelaConfig.findOne({
             where: {
                 diaSemana: dia,
@@ -655,13 +611,11 @@ app.post('/toggle-bloqueio-horario', async (req, res) => {
         });
 
         if (horarioExistente) {
-            // Alterna o status de bloqueio
             await tabelaConfig.update(
                 { bloqueado: !horarioExistente.bloqueado },
                 { where: { id: horarioExistente.id } }
             );
         } else {
-            // Cria novo registro com bloqueio ativado
             await tabelaConfig.create({
                 diaSemana: dia,
                 horario: horario,
@@ -689,7 +643,6 @@ app.get('/api/download/weekly', async (req, res) => {
         const agora = new Date();
         const segundaFeira = new Date(agora);
         
-        // Encontrar a última segunda-feira às 9h
         segundaFeira.setDate(agora.getDate() - (agora.getDay() + 6) % 7);
         segundaFeira.setHours(9, 0, 0, 0);
         
@@ -758,7 +711,6 @@ async function generateExcel(alunos, title) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(title);
     
-    // Cabeçalhos
     worksheet.columns = [
         { header: 'Nome', key: 'name', width: 30 },
         { header: 'Email', key: 'email', width: 30 },
@@ -772,7 +724,6 @@ async function generateExcel(alunos, title) {
         { header: 'Data Cadastro', key: 'createdAt', width: 20 }
     ];
     
-    // Adicionar dados
     alunos.forEach(aluno => {
         worksheet.addRow({
             name: aluno.name,
@@ -809,11 +760,10 @@ async function sendExcel(res, workbook, filename) {
 app.use('/api/cadastro', async (req, res, next) => {
     try {
         const agora = new Date();
-        const diaSemana = agora.getDay(); // 0=Domingo, 1=Segunda...
+        const diaSemana = agora.getDay();
         const hora = agora.getHours();
         const minutos = agora.getMinutes();
 
-        // Verifica se é segunda-feira entre 9h e 23h59
         const isSegundaValida = diaSemana === 1 && hora >= 9 && (hora < 23 || (hora === 23 && minutos <= 59));
 
         if (!isSegundaValida) {
@@ -857,20 +807,16 @@ function calcularDisponibilidade(config, ocupados) {
     let totalVagasDisponiveis = 0;
     const detalhesDisponibilidade = {};
 
-    // Para cada modalidade (mme, rt, online)
     Object.entries(config).forEach(([modalidade, horariosConfig]) => {
         const nomeUnidade = unidades[modalidade];
         detalhesDisponibilidade[nomeUnidade] = {};
 
-        // Para cada dia da semana
         diasDaSemana.forEach(dia => {
-            // Filtra horários configurados para este dia (não bloqueados)
             const horariosConfigDia = horariosConfig.filter(h => 
                 h.diaSemana === dia && 
                 h.bloqueado === false
             ).map(h => h.horario);
 
-            // Filtra horários ocupados para esta unidade/dia
             const horariosOcupadosDia = ocupados.filter(o => 
                 o.dia === dia && 
                 (modalidade === 'online' ? 
@@ -878,7 +824,6 @@ function calcularDisponibilidade(config, ocupados) {
                     o.unidade === nomeUnidade)
             ).map(o => o.horario);
 
-            // Remove horários ocupados dos configurados
             const horariosDisponiveis = horariosConfigDia.filter(
                 h => !horariosOcupadosDia.includes(h)
             );
@@ -898,7 +843,7 @@ function calcularDisponibilidade(config, ocupados) {
         totalVagasDisponiveis,
         detalhesDisponibilidade,
         todasVagasPreenchidas: totalVagasDisponiveis === 0 && 
-            Object.values(config).some(c => c.length > 0) // Verifica se há alguma configuração
+            Object.values(config).some(c => c.length > 0)
     };
 }
 
@@ -945,9 +890,7 @@ app.get('/api/verificar-disponibilidade', async (req, res) => {
                 motivo: 'vagas_esgotadas',
                 message: 'Todas as vagas disponíveis já foram preenchidas',
                 proximaDisponibilidade: getProximaDisponibilidade(),
-                dataUsada: agora.toISOString() // Adicionado para debug
             };
-            console.log('Vagas esgotadas:', response);
             return res.json(response);
         }
 
@@ -955,7 +898,7 @@ app.get('/api/verificar-disponibilidade', async (req, res) => {
             disponivel: true,
             motivo: null,
             message: 'Cadastro disponível',
-            dataUsada: agora.toISOString(), // Adicionado para debug
+            dataUsada: agora.toISOString(),
             ...disponibilidade
         };
         console.log('Disponível:', response);
@@ -982,15 +925,13 @@ function getProximaDisponibilidade() {
     const diaSemana = agora.getDay();
     const hora = agora.getHours();
     
-    // Se já for segunda mas antes das 9h
     if (diaSemana === 1 && hora < 9) {
         return {
             dia: 'hoje',
             horario: 'a partir das 9h'
         };
     }
-    
-    // Calcula quantos dias faltam para a próxima segunda
+
     const diasParaProximaSegunda = diaSemana === 0 ? 1 : (8 - diaSemana) % 7;
     const proximaSegunda = new Date(agora);
     proximaSegunda.setDate(agora.getDate() + diasParaProximaSegunda);
@@ -1020,7 +961,6 @@ function getInicioSemanaAtual() {
     const diasParaSubtrair = agora.getDay() === 0 ? 6 : agora.getDay() - 1;
     inicioSemana.setDate(agora.getDate() - diasParaSubtrair);
     
-    // Zera horas, minutos, segundos e milissegundos
     inicioSemana.setHours(0, 0, 0, 0);
     
     return inicioSemana;
@@ -1117,13 +1057,11 @@ async function verificarVagasEEnviarEmail() {
             const vagasOcupadas = Object.values(dias).reduce((sum, dia) => sum + dia.vagasOcupadasDia, 0);
             const lotado = (totalVagas > 0 && vagasOcupadas >= totalVagas);
 
-            // Verificação para lotação imediata (qualquer dia da semana)
             if (lotado && !unidadesNotificadas.lotadas.has(chaveUnidade)) {
                 await enviarEmailUnidade(unidade, alunos, dias, true);
                 unidadesNotificadas.lotadas.add(chaveUnidade);
             }
             
-            // Verificação para vagas remanescentes (apenas terça-feira em diante)
             if (diaSemana >= 2 && !lotado && !unidadesNotificadas.remanescentes.has(chaveUnidade)) {
                 await enviarEmailUnidade(unidade, alunos, dias, false);
                 unidadesNotificadas.remanescentes.add(chaveUnidade);
@@ -1135,11 +1073,9 @@ async function verificarVagasEEnviarEmail() {
 }
 
 async function enviarEmailUnidade(unidade, alunos, dias, todasVagasPreenchidas) {
-    // Calcula estatísticas
     const totalVagas = Object.values(dias).reduce((sum, dia) => sum + dia.totalVagasDia, 0);
     const vagasOcupadas = Object.values(dias).reduce((sum, dia) => sum + dia.vagasOcupadasDia, 0);
 
-    // Template para vagas LOTADAS
     if (todasVagasPreenchidas) {
         const assunto = `[INFOS] Vagas Lotadas - ${unidade}`;
         
@@ -1186,7 +1122,6 @@ async function enviarEmailUnidade(unidade, alunos, dias, todasVagasPreenchidas) 
             html: emailContent
         });
     } 
-    // Template para vagas REMANESCENTES
     else {
         const assunto = `[INFOS] Vagas Preenchidas - ${unidade}`;
         
@@ -1208,7 +1143,6 @@ async function enviarEmailUnidade(unidade, alunos, dias, todasVagasPreenchidas) 
                 <tbody>
         `;
 
-        // Lista de alunos agendados
         alunos.forEach(aluno => {
             emailContent += `
                 <tr>
@@ -1238,7 +1172,6 @@ async function enviarEmailUnidade(unidade, alunos, dias, todasVagasPreenchidas) 
                 <tbody>
         `;
 
-        // Lista de horários disponíveis
         for (const [dia, info] of Object.entries(dias)) {
             info.horariosDisponiveis.forEach(horario => {
                 emailContent += `
@@ -1269,9 +1202,7 @@ async function enviarEmailUnidade(unidade, alunos, dias, todasVagasPreenchidas) 
 
 async function ListaDeEsperaEmail() {
     try {
-        console.log('Iniciando envio do e-mail da lista de espera...');
         
-        // 1. Obter todos os alunos da lista de espera
         const alunos = await AlunoLista.findAll({
             order: [
                 ['dia', 'ASC'],
@@ -1279,15 +1210,12 @@ async function ListaDeEsperaEmail() {
             ]
         });
 
-        console.log(`Total de alunos encontrados: ${alunos.length}`);
 
-        // 2. Se não houver alunos, não envia e-mail
         if (alunos.length === 0) {
             console.log('Nenhum aluno na lista de espera. E-mail não enviado.');
             return { success: false, message: 'Nenhum aluno na lista de espera' };
         }
 
-        // 3. Criar o conteúdo HTML do e-mail
         const emailContent = `
             <html>
             <head>
@@ -1343,7 +1271,6 @@ async function ListaDeEsperaEmail() {
             </html>
         `;
 
-        // 4. Configurar o e-mail
         const mailOptions = {
             from: 'Sistema de Agendamento <emailtccteste@gmail.com>',
             to: 'emailtccteste@gmail.com',
@@ -1351,7 +1278,6 @@ async function ListaDeEsperaEmail() {
             html: emailContent
         };
 
-        // 5. Enviar o e-mail
         const info = await transporter.sendMail(mailOptions);
         console.log(`E-mail enviado com sucesso: ${info.messageId}`);
         

@@ -54,7 +54,6 @@ const Date = ({
             <p className="date-day">{day}</p>
             <div className="date-buttons">
                 {times.map((time, index) => {
-                    // Na lista de espera, todos horários estão disponíveis
                     const isIndisponivel = isWaitList ? false : horariosIndisponiveis.includes(time);
                     return (
                         <button

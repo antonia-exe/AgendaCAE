@@ -22,13 +22,12 @@ const AppContent = () => {
     try {
       const response = await axios.get('http://localhost:5000/api/verificar-disponibilidade', {
         params: {
-          dataTeste: '2025-04-07T09:00:00' // Para testes
+          dataTeste: '2025-04-21T09:00:00' // Para testes
         }
       });
 
       console.log('Dados recebidos:', response.data);
 
-      // Lógica corrigida
       if (response.data.disponivel && location.pathname === '/off') {
         navigate('/');
       } else if (!response.data.disponivel && location.pathname === '/') {
