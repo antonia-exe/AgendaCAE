@@ -1,13 +1,11 @@
-// src/database/database.js
 const { Sequelize } = require('sequelize');
+const path = require('path');
 
-// Configuração do banco de dados
 const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: 'C:/Users/antonia/agenda-caes/src/database/database.sqlite' // Caminho do banco de dados
+    storage: path.join(__dirname, 'database.sqlite')
 });
 
-// Função para testar a conexão com o banco de dados
 async function testConnection() {
     try {
         await sequelize.authenticate();
@@ -17,10 +15,8 @@ async function testConnection() {
     }
 }
 
-// Testar a conexão se o arquivo for executado diretamente
 if (require.main === module) {
     testConnection();
 }
 
-// Exportar a instância do Sequelize para ser usada em outros arquivos
 module.exports = sequelize;
